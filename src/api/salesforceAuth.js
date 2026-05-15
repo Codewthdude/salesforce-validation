@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { getAuthBaseUrl, getRedirectUri, requiredEnv } from '../utils/constants';
 import { clearAuth, isAuthExpired, loadAuth, saveAuth } from '../utils/storage';
 
