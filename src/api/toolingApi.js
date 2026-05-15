@@ -90,31 +90,22 @@ export const toggleValidationRule = async (accessToken, instanceUrl, ruleId, new
   const cleanId = cleanRuleId(ruleId);
   console.log(`Toggling rule ${cleanId} to active=${newActiveState}`);
 
-  const res = await fetch(
-    `${BACKEND}/api/tooling/rule/${cleanId}`,
-    {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'x-instance-url': instanceUrl,
-        'Content-Type': 'application/json',
-        'X-HTTP-Method-Override': 'PATCH',
-      },
-      body: JSON.stringify({
-        Metadata: { active: newActiveState },
-      }),
+  const res = await fetch(`${BACKEND}/api/tooling/rule/${cleanId}`, {
+    method: 'PATCH',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'x-instance-url': instanceUrl,
+      'Content-Type': 'application/json'
+      // ← Remove X-HTTP-Method-Override completely
     },
-  );
+    body: JSON.stringify({ Metadata: { active: newActiveState } })
+  });
 
   const data = await res.json();
-
   if (!res.ok) {
     console.error('Toggle failed:', data);
-    throw new Error(
-      data.error?.[0]?.message || data.error || 'Failed to update rule',
-    );
+    throw new Error(data.error?.[0]?.message || data.error || 'Failed to update rule');
   }
-
   return data;
 };
 
