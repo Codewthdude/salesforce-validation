@@ -53,6 +53,7 @@ const fetchAllValidationRules = async (accessToken, instanceUrl) => {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'x-instance-url': instanceUrl,
+        'Content-Type': 'application/json',
       },
     },
   );
