@@ -86,6 +86,7 @@ export const toggleValidationRule = async (accessToken, instanceUrl, ruleId, new
         Authorization: `Bearer ${accessToken}`,
         'x-instance-url': instanceUrl,
         'Content-Type': 'application/json',
+        'X-HTTP-Method-Override': 'PATCH',
       },
       body: JSON.stringify({
         Metadata: { active: newActiveState },
