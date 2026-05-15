@@ -45,9 +45,11 @@ export const useValidationRules = (accessToken, instanceUrl) => {
 
     try {
       const fetchedRules = await fetchRulesFromSalesforce(accessToken, instanceUrl);
+      console.log('Fetched validation rules length:', fetchedRules.length);
       setRules(fetchedRules);
       setLocalRules(fetchedRules.map((rule) => ({ ...rule, pendingChange: false })));
       setPendingChanges(new Set());
+      setError('');
     } catch (fetchError) {
       setError(fetchError.message);
     } finally {
@@ -101,9 +103,11 @@ export const useValidationRules = (accessToken, instanceUrl) => {
       }
 
       const fetchedRules = await fetchRulesFromSalesforce(accessToken, instanceUrl);
+      console.log('Fetched validation rules length after deploy:', fetchedRules.length);
       setRules(fetchedRules);
       setLocalRules(fetchedRules.map((rule) => ({ ...rule, pendingChange: false })));
       setPendingChanges(new Set());
+      setError('');
 
       return result;
     } catch (deployError) {

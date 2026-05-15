@@ -1,5 +1,20 @@
 const BACKEND = import.meta.env.VITE_BACKEND_URL || '';
 
+const cleanRuleId = (ruleId) => ruleId?.toString().split(':')[0] || '';
+
+const mapValidationRules = (records = []) => {
+  const mappedRules = records.map((r) => ({
+    id: cleanRuleId(r.Id),
+    name: r.ValidationName,
+    active: r.Active,
+    description: r.Description || 'No description provided',
+    errorMessage: r.ErrorMessage || '',
+  }));
+
+  console.log('Mapped validation rules length:', mappedRules.length);
+  return mappedRules;
+};
+
 export const fetchValidationRules = async (accessToken, instanceUrl) => {
   // Use a simpler SOQL first — EntityDefinition join can fail on some orgs
   const q = `SELECT Id, ValidationName, Active, Description, ErrorMessage, EntityDefinitionId FROM ValidationRule WHERE EntityDefinition.QualifiedApiName = 'Account' ORDER BY ValidationName ASC`;
@@ -19,6 +34,14 @@ export const fetchValidationRules = async (accessToken, instanceUrl) => {
     const data = await res.json();
     console.log('API response:', data);
 
+    if (Array.isArray(data.records)) {
+      const mappedRules = mapValidationRules(data.records);
+
+      if (mappedRules.length > 0) {
+        return mappedRules;
+      }
+    }
+
     if (!res.ok) {
       console.error('Fetch rules error:', data);
       // Try fallback query without WHERE clause filter
@@ -30,13 +53,7 @@ export const fetchValidationRules = async (accessToken, instanceUrl) => {
       return await fetchAllValidationRules(accessToken, instanceUrl);
     }
 
-    return data.records.map((r) => ({
-      id: r.Id,
-      name: r.ValidationName,
-      active: r.Active,
-      description: r.Description || 'No description provided',
-      errorMessage: r.ErrorMessage || '',
-    }));
+    return mapValidationRules(data.records);
   } catch (err) {
     console.error('fetchValidationRules failed:', err);
     throw new Error('Unable to load validation rules. Check console for details.');
@@ -66,20 +83,15 @@ const fetchAllValidationRules = async (accessToken, instanceUrl) => {
 
   // Filter for Account rules only by checking EntityDefinitionId pattern
   // or return all if filter fails
-  return data.records.map((r) => ({
-    id: r.Id,
-    name: r.ValidationName,
-    active: r.Active,
-    description: r.Description || 'No description provided',
-    errorMessage: r.ErrorMessage || '',
-  }));
+  return mapValidationRules(data.records);
 };
 
 export const toggleValidationRule = async (accessToken, instanceUrl, ruleId, newActiveState) => {
-  console.log(`Toggling rule ${ruleId} to active=${newActiveState}`);
+  const cleanId = cleanRuleId(ruleId);
+  console.log(`Toggling rule ${cleanId} to active=${newActiveState}`);
 
   const res = await fetch(
-    `${BACKEND}/api/tooling/rule/${ruleId}`,
+    `${BACKEND}/api/tooling/rule/${cleanId}`,
     {
       method: 'PATCH',
       headers: {
